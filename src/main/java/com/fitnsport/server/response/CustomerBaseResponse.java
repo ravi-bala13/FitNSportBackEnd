@@ -19,4 +19,6 @@ import java.util.List;
 public class CustomerBaseResponse extends BaseResponse{
     List<Customer> customers;
     Customer customer;
+    String accessToken;
+    String customerName;
 }

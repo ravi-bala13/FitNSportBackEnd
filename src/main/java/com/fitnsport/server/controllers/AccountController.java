@@ -2,11 +2,11 @@ package com.fitnsport.server.controllers;
 
 import com.fitnsport.server.Business.CustomerBL;
 import com.fitnsport.server.Requests.CustomerBaseRequest;
-import com.fitnsport.server.database.entity.Customer;
 import com.fitnsport.server.response.BaseResponse;
 import com.fitnsport.server.utils.BaseResponseUtil;
 import io.micrometer.common.util.StringUtils;
 import io.swagger.annotations.ApiOperation;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +18,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/account")
 public class AccountController {
+
+    @Autowired
+    private HttpServletRequest request;
 
     @Autowired
     CustomerBL customerBL;
@@ -35,8 +38,7 @@ public class AccountController {
                 return BaseResponseUtil.createErrorBaseResponse("User already exists");
             }
 
-            customerBL.saveUserDetails(customerBaseRequest);
-            return BaseResponseUtil.createSuccessBaseResponse();
+            return customerBL.saveUserDetails(customerBaseRequest);
         } catch (Exception e) {
             log.error("Error in registerUser", e);
             return BaseResponseUtil.createErrorBaseResponse(e.getMessage());
@@ -53,6 +55,17 @@ public class AccountController {
             }
 
             return customerBL.getUserDetail(customerBaseRequest);
+        } catch (Exception e) {
+            log.error("Error in loginUser", e);
+            return BaseResponseUtil.createErrorBaseResponse(e.getMessage());
+        }
+    }
+
+    @ApiOperation("This API is used to login a user")
+    @PostMapping("/checkWhetherUserLoggedIn")
+    public BaseResponse checkWhetherUserLoggedIn() {
+        try {
+            return customerBL.checkWhetherUserLoggedIn(request);
         } catch (Exception e) {
             log.error("Error in loginUser", e);
             return BaseResponseUtil.createErrorBaseResponse(e.getMessage());

@@ -1,14 +1,18 @@
 package com.fitnsport.server.Business;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fitnsport.server.response.BaseResponse;
 import com.fitnsport.server.response.CustomerBaseResponse;
 import com.fitnsport.server.utils.BaseResponseUtil;
 
 import com.fitnsport.server.utils.JwtTokenUtil;
 import com.fitnsport.server.utils.PasswordUtil;
+import io.micrometer.common.util.StringUtils;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.scheduling.annotation.Async;
@@ -37,7 +41,7 @@ public class CustomerBL {
     @Autowired
     private HttpServletResponse response;
     @Async
-    public void saveUserDetails(CustomerBaseRequest customerBaseRequest) {
+    public BaseResponse saveUserDetails(CustomerBaseRequest customerBaseRequest) {
         String hashedPassword = passwordUtil.hashPassword(customerBaseRequest.getPassword());
 
         Customer user = Customer.builder()
@@ -49,18 +53,31 @@ public class CustomerBL {
                 .build();
         customerDao.save(user);
 
-        setAccessTokenInCookie(customerBaseRequest.getName());
+        return BaseResponseUtil.createSuccessBaseResponseWithResults(
+                CustomerBaseResponse.builder()
+                        .customerName(user.getCustomerName())
+                        .accessToken(jwtTokenUtil.generateToken(user))
+                        .build());
     }
 
-    private void setAccessTokenInCookie(String name) {
-        String token = jwtTokenUtil.generateToken(name);
+    private void setAccessTokenInCookie(Customer user) {
+        String token = jwtTokenUtil.generateToken(user);
 
-        Cookie cookie = new Cookie("access_token", token);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(3600);    // Set the cookie expiration time (1 hour)
-        response.addCookie(cookie);
+//        Cookie cookie = new Cookie("access-token", token);
+//        cookie.setHttpOnly(true);
+//        cookie.setSecure(false);
+//        cookie.setPath("/");
+//        cookie.setDomain("localhost");
+//        cookie.setMaxAge(3600);    // Set the cookie expiration time (1 hour)
+//        response.addCookie(cookie);
+
+        ResponseCookie resCookie = ResponseCookie.from("access-token", token)
+                .httpOnly(true)
+                .sameSite("None")
+                .path("/")
+                .maxAge(3600)
+                .build();
+        response.addHeader("Set-Cookie", resCookie.toString());
     }
 
     public BaseResponse getUserDetails() {
@@ -92,9 +109,11 @@ public class CustomerBL {
                 Customer customer = customerOpt.get();
                 boolean isAuthenticated = passwordUtil.verifyPassword(customerBaseRequest.getPassword(), customer.getPassword());
                 if (isAuthenticated) {
-                    return BaseResponseUtil.createSuccessBaseResponseWithResults(Customer.builder()
-                            .customerName(customerBaseRequest.getName())
-                            .build());
+                    return BaseResponseUtil.createSuccessBaseResponseWithResults(
+                                CustomerBaseResponse.builder()
+                                    .customerName(customer.getCustomerName())
+                                    .accessToken(jwtTokenUtil.generateToken(customer))
+                                    .build());
                 } else {
                     return BaseResponseUtil.createErrorBaseResponse("Invalid email or password");
                 }
@@ -104,6 +123,35 @@ public class CustomerBL {
             log.info("Error in getUserDetails", e);
             return BaseResponseUtil.createErrorBaseResponse();
         }
+    }
+
+    public BaseResponse checkWhetherUserLoggedIn(HttpServletRequest request){
+        BaseResponse baseResponse = new BaseResponse();
+        String accessToken = request.getHeader("Access-Token");
+
+        if(StringUtils.isEmpty(accessToken)){
+            baseResponse.setMessage("Not authorized");
+            return  baseResponse;
+        }
+
+        return BaseResponseUtil.createSuccessBaseResponseWithResults(
+                CustomerBaseResponse.builder()
+                        .accessToken(jwtTokenUtil.generateToken(new Customer()))
+                        .build());
+
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        Customer user;
+//        try {
+//            user = objectMapper.readValue(accessToken, Customer.class);
+//        }catch (Exception e){
+//            baseResponse.setMessage("Invalid AccessToken");
+//            return  baseResponse;
+//        }
+//        if (!isUserExists(user.getCustomerEmail())) {
+//            baseResponse.setMessage("User not found");
+//            return baseResponse;
+//        }
+//        return BaseResponseUtil.createSuccessBaseResponseWithResults(user);
     }
 
     public boolean isUserExists(String emailId) {
