@@ -4,7 +4,8 @@
 #
 # Build stage
 #
-FROM openjdk:17-jdk-slim AS build
+# FROM openjdk:17-jdk-slim AS build
+FROM maven:3.9.6-openjdk-17 AS build
 COPY . .
 RUN mvn clean package -Pprod -DskipTests
 
