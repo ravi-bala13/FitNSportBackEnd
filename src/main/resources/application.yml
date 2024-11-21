@@ -11,4 +11,4 @@ mongo-db:
 spring:
   data:
     mongodb:
-      uri: 
+      uri: ${MONGODB_URI}
