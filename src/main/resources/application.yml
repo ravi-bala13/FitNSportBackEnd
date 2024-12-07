@@ -17,4 +17,4 @@ security:
 spring:
   data:
     mongodb:
-      uri: mongodb+srv://ravibala-13:Bals2202@fitncluster.uck1z.mongodb.net/FitNSport?retryWrites=true&w=majority
+      uri: ${MONGODB_URI}
