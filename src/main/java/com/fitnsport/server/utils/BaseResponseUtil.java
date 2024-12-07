@@ -1,10 +1,34 @@
 package com.fitnsport.server.utils;
 
 import com.fitnsport.server.response.BaseResponse;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 @Service
 public class BaseResponseUtil {
+
+    public static ResponseEntity<BaseResponse> createBaseResponse(String message, HttpStatus httpStatus){
+        BaseResponse response = BaseResponse.builder()
+                .es(0)
+                .message(message)
+                .status(httpStatus.value())
+                .time(System.currentTimeMillis())
+                .build();
+        return ResponseEntity.status(httpStatus).body(response);
+    }
+    public static ResponseEntity<BaseResponse> createSuccessBaseResponse(Object response){
+
+        BaseResponse baseResponse = BaseResponse.builder()
+                .es(0)
+                .message("success")
+                .status(HttpStatus.OK.value())
+                .results(response)
+                .time(System.currentTimeMillis())
+                .build();
+        return ResponseEntity.status(HttpStatus.OK).body(baseResponse);
+    }
+
 
     public static BaseResponse createSuccessBaseResponse() {
         return BaseResponse.builder()
@@ -45,7 +69,7 @@ public class BaseResponseUtil {
 
     public static BaseResponse createNoDataBaseResponse() {
         return BaseResponse.builder()
-                .es(2)
+                .es(1)
                 .message("No data found!")
                 .status(300)
                 .time(System.currentTimeMillis())

@@ -9,6 +9,8 @@ import io.swagger.annotations.ApiOperation;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,49 +28,49 @@ public class AccountController {
     CustomerBL customerBL;
     @ApiOperation("This API is used to register a new user")
     @PostMapping("/signup")
-    public BaseResponse registerUser(@RequestBody CustomerBaseRequest customerBaseRequest) {
+    public ResponseEntity<BaseResponse> registerUser(@RequestBody CustomerBaseRequest customerBaseRequest) {
         try {
             log.info("customerBaseRequest - {}", customerBaseRequest);
             if (StringUtils.isEmpty(customerBaseRequest.getName()) || StringUtils.isEmpty(customerBaseRequest.getEmail())) {
-                return BaseResponseUtil.createErrorBaseResponse("Username or Email must not be empty");
+                return new ResponseEntity<>(BaseResponseUtil.createErrorBaseResponse("Username or Email must not be empty"), HttpStatus.BAD_REQUEST);
             }
 
             // Check if user already exists
             if (customerBL.isUserExists(customerBaseRequest.getEmail())) {
-                return BaseResponseUtil.createErrorBaseResponse("User already exists");
+                return new ResponseEntity<>(BaseResponseUtil.createErrorBaseResponse("User already exists"), HttpStatus.BAD_REQUEST);
             }
 
             return customerBL.saveUserDetails(customerBaseRequest);
         } catch (Exception e) {
             log.error("Error in registerUser", e);
-            return BaseResponseUtil.createErrorBaseResponse(e.getMessage());
+            return new ResponseEntity<>(BaseResponseUtil.createErrorBaseResponse(e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @ApiOperation("This API is used to login a user")
     @PostMapping("/login")
-    public BaseResponse loginUser(@RequestBody CustomerBaseRequest customerBaseRequest) {
+    public ResponseEntity<BaseResponse> loginUser(@RequestBody CustomerBaseRequest customerBaseRequest) {
         try {
             log.info("loginRequest - {}", customerBaseRequest);
             if (StringUtils.isEmpty(customerBaseRequest.getEmail()) || StringUtils.isEmpty(customerBaseRequest.getPassword())) {
-                return BaseResponseUtil.createErrorBaseResponse("Email or Password must not be empty");
+                return new ResponseEntity<>(BaseResponseUtil.createErrorBaseResponse("Email or Password must not be empty"), HttpStatus.BAD_REQUEST);
             }
 
-            return customerBL.getUserDetail(customerBaseRequest);
+            return ResponseEntity.ok(customerBL.getUserDetail(customerBaseRequest));
         } catch (Exception e) {
             log.error("Error in loginUser", e);
-            return BaseResponseUtil.createErrorBaseResponse(e.getMessage());
+            return new ResponseEntity<>(BaseResponseUtil.createErrorBaseResponse(e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @ApiOperation("This API is used to login a user")
     @PostMapping("/checkWhetherUserLoggedIn")
-    public BaseResponse checkWhetherUserLoggedIn() {
+    public ResponseEntity<BaseResponse> checkWhetherUserLoggedIn() {
         try {
             return customerBL.checkWhetherUserLoggedIn(request);
         } catch (Exception e) {
             log.error("Error in loginUser", e);
-            return BaseResponseUtil.createErrorBaseResponse(e.getMessage());
+            return new ResponseEntity<>(BaseResponseUtil.createErrorBaseResponse(e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

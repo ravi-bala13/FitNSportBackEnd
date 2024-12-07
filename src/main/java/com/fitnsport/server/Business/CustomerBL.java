@@ -1,6 +1,7 @@
 package com.fitnsport.server.Business;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fitnsport.server.dto.AccessToken;
 import com.fitnsport.server.response.BaseResponse;
 import com.fitnsport.server.response.CustomerBaseResponse;
 import com.fitnsport.server.utils.BaseResponseUtil;
@@ -12,7 +13,10 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.scheduling.annotation.Async;
@@ -41,7 +45,7 @@ public class CustomerBL {
     @Autowired
     private HttpServletResponse response;
     @Async
-    public BaseResponse saveUserDetails(CustomerBaseRequest customerBaseRequest) {
+    public ResponseEntity<BaseResponse> saveUserDetails(CustomerBaseRequest customerBaseRequest) {
         String hashedPassword = passwordUtil.hashPassword(customerBaseRequest.getPassword());
 
         Customer user = Customer.builder()
@@ -53,117 +57,80 @@ public class CustomerBL {
                 .build();
         customerDao.save(user);
 
-        return BaseResponseUtil.createSuccessBaseResponseWithResults(
-                CustomerBaseResponse.builder()
-                        .customerName(user.getCustomerName())
-                        .accessToken(jwtTokenUtil.generateToken(user))
-                        .build());
-    }
-
-    private void setAccessTokenInCookie(Customer user) {
-        String token = jwtTokenUtil.generateToken(user);
-
-//        Cookie cookie = new Cookie("access-token", token);
-//        cookie.setHttpOnly(true);
-//        cookie.setSecure(false);
-//        cookie.setPath("/");
-//        cookie.setDomain("localhost");
-//        cookie.setMaxAge(3600);    // Set the cookie expiration time (1 hour)
-//        response.addCookie(cookie);
-
-        ResponseCookie resCookie = ResponseCookie.from("access-token", token)
-                .httpOnly(true)
-                .sameSite("None")
-                .path("/")
-                .maxAge(3600)
+        AccessToken accessToken = AccessToken.builder()
+                                    .userName(user.getCustomerName())
+                                    .userEmail(user.getCustomerEmail())
+                                    .createdAt(new Date()).build();
+        String accessTokenstring = jwtTokenUtil.generateToken(accessToken);
+        CustomerBaseResponse customerBaseResponse = CustomerBaseResponse.builder()
+                .customerName(user.getCustomerName())
+                .accessToken(accessTokenstring)
+                .customerName(user.getCustomerName())
                 .build();
-        response.addHeader("Set-Cookie", resCookie.toString());
+        return BaseResponseUtil.createSuccessBaseResponse(customerBaseResponse);
     }
 
-    public BaseResponse getUserDetails() {
-        try {
-            List<Customer> customers;
-                customers = customerDao.findAll();
+    public ResponseEntity<BaseResponse> getAllUsers() {
+        List<Customer> customers;
+            customers = customerDao.findAll();
 
-            if(CollectionUtils.isEmpty(customers))
-                return BaseResponseUtil.createNoDataBaseResponse();
+        if(CollectionUtils.isEmpty(customers))
+            return BaseResponseUtil.createBaseResponse("No users found", HttpStatus.OK);
 
-            return CustomerBaseResponse.builder()
-                    .customers(customers)
-                    .es(0)
-                    .message("success !")
-                    .status(200)
-                    .time(System.currentTimeMillis())
-                    .build();
-        }catch (Exception e){
-            log.info("Error in getUserDetails", e);
-            return BaseResponseUtil.createErrorBaseResponse();
-        }
+        return BaseResponseUtil.createSuccessBaseResponse(CustomerBaseResponse.builder()
+                .customers(customers)
+                .build());
     }
 
     public BaseResponse getUserDetail(CustomerBaseRequest customerBaseRequest) {
-        try {
-            Optional<Customer> customerOpt = customerDao.findByCustomerEmail(customerBaseRequest.getEmail());
+        Optional<Customer> customerOpt = customerDao.findByCustomerEmail(customerBaseRequest.getEmail());
 
-            if(customerOpt.isPresent()){
-                Customer customer = customerOpt.get();
-                boolean isAuthenticated = passwordUtil.verifyPassword(customerBaseRequest.getPassword(), customer.getPassword());
-                if (isAuthenticated) {
-                    return BaseResponseUtil.createSuccessBaseResponseWithResults(
-                                CustomerBaseResponse.builder()
-                                    .customerName(customer.getCustomerName())
-                                    .accessToken(jwtTokenUtil.generateToken(customer))
-                                    .build());
-                } else {
-                    return BaseResponseUtil.createErrorBaseResponse("Invalid email or password");
-                }
+        if(customerOpt.isPresent()){
+            Customer customer = customerOpt.get();
+            boolean isAuthenticated = passwordUtil.verifyPassword(customerBaseRequest.getPassword(), customer.getPassword());
+            if (isAuthenticated) {
+
+                AccessToken accessToken = AccessToken.builder()
+                                            .userName(customer.getCustomerName())
+                                            .userEmail(customer.getCustomerName())
+                                            .createdAt(new Date()).build();
+                String accessTokenstring = jwtTokenUtil.generateToken(accessToken);
+
+                return BaseResponseUtil.createSuccessBaseResponseWithResults(
+                            CustomerBaseResponse.builder()
+                                .customerName(customer.getCustomerName())
+                                .accessToken(accessTokenstring)
+                                .build());
+            } else {
+                return BaseResponseUtil.createErrorBaseResponse("Invalid email or password");
             }
-            return BaseResponseUtil.createNoDataBaseResponse();
-        }catch (Exception e){
-            log.info("Error in getUserDetails", e);
-            return BaseResponseUtil.createErrorBaseResponse();
         }
+        return BaseResponseUtil.createNoDataBaseResponse();
     }
 
-    public BaseResponse checkWhetherUserLoggedIn(HttpServletRequest request){
-        BaseResponse baseResponse = new BaseResponse();
+    public ResponseEntity<BaseResponse> checkWhetherUserLoggedIn(HttpServletRequest request){
         String accessToken = request.getHeader("Access-Token");
 
         if(StringUtils.isEmpty(accessToken)){
-            baseResponse.setMessage("Not authorized");
-            return  baseResponse;
+            return BaseResponseUtil.createBaseResponse(HttpStatus.UNAUTHORIZED.getReasonPhrase(), HttpStatus.UNAUTHORIZED);
         }
 
-        return BaseResponseUtil.createSuccessBaseResponseWithResults(
-                CustomerBaseResponse.builder()
-                        .accessToken(jwtTokenUtil.generateToken(new Customer()))
-                        .build());
+        AccessToken accessTokenObj = jwtTokenUtil.extractAccessToken(accessToken);
+        if(jwtTokenUtil.isTokenExpired(accessTokenObj)){
+            return BaseResponseUtil.createBaseResponse(HttpStatus.UNAUTHORIZED.getReasonPhrase(), HttpStatus.UNAUTHORIZED);
+        }
+        accessTokenObj.setCreatedAt(new Date()); // renewal of token
 
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        Customer user;
-//        try {
-//            user = objectMapper.readValue(accessToken, Customer.class);
-//        }catch (Exception e){
-//            baseResponse.setMessage("Invalid AccessToken");
-//            return  baseResponse;
-//        }
-//        if (!isUserExists(user.getCustomerEmail())) {
-//            baseResponse.setMessage("User not found");
-//            return baseResponse;
-//        }
-//        return BaseResponseUtil.createSuccessBaseResponseWithResults(user);
+        CustomerBaseResponse customerBaseResponse = CustomerBaseResponse.builder()
+                .accessToken(jwtTokenUtil.generateToken(accessTokenObj))
+                .customerName(accessTokenObj.getUserName())
+                .build();
+
+        return BaseResponseUtil.createSuccessBaseResponse(customerBaseResponse);
     }
 
     public boolean isUserExists(String emailId) {
         return customerDao.findByCustomerEmail(emailId).isPresent();
     }
 
-    public boolean authenticateUser(String emailId, String password) {
-        Optional<Customer> customerOpt = customerDao.findByCustomerEmail(emailId);
-        if (customerOpt.isPresent()) {
-            Customer customer = customerOpt.get();
-            return passwordUtil.verifyPassword(password, customer.getPassword());
-        }
-        return false;
-    }
 }

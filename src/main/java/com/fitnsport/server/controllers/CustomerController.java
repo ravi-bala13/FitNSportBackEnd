@@ -41,7 +41,7 @@ public class CustomerController {
     @GetMapping("/get-customer")
     public BaseResponse getUsers(){
         try {
-            return BaseResponseUtil.createSuccessBaseResponseWithResults(customerBL.getUserDetails());
+            return BaseResponseUtil.createSuccessBaseResponseWithResults(customerBL.getAllUsers());
         }catch (Exception e){
             log.info("Error in addUser", e);
             return BaseResponseUtil.createErrorBaseResponse(e.getMessage());

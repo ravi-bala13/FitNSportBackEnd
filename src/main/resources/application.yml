@@ -8,6 +8,12 @@ server:
 mongo-db:
   name: entertainment
 
+security:
+  jwt:
+    secret-key:
+    token:
+      ttl: 60
+
 spring:
   data:
     mongodb:

@@ -16,7 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CustomerBaseResponse extends BaseResponse{
+public class CustomerBaseResponse{
     List<Customer> customers;
     Customer customer;
     String accessToken;
