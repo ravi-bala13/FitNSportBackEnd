@@ -14,14 +14,26 @@ import java.util.Date;
 public class Product {
 
     @Id
-    @Field("item_id")
-    private Integer itemId;
+    @Field("product_id")
+    private Integer productId;
 
-    @Field("item_name")
-    private String itemName;
+    @Field("product_name")
+    private String productName;
 
-    @Field("item_description")
-    private String itemDescription;
+    @Field("product_description")
+    private String productDescription;
+
+    @Field("image_url")
+    private String imageUrl;
+
+    @Field("height")
+    private String height;
+
+    @Field("width")
+    private String width;
+
+    @Field("weight")
+    private String weight;
 
     @Field("supplier_id")
     private Integer supplierId;
@@ -30,6 +42,8 @@ public class Product {
     private Integer categoryId;
 
     private Double price;
+
+    private Integer quantity;
 
     @Field("created_at")
     private Date createdAt;

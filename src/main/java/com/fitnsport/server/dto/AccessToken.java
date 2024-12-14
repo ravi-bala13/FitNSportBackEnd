@@ -14,6 +14,7 @@ import java.util.Date;
 @SuperBuilder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AccessToken {
+    private Integer userId;
     private String userName;
     private String userEmail;
     private Date createdAt;

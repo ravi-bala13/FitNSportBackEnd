@@ -29,14 +29,15 @@ public class BaseResponseUtil {
         return ResponseEntity.status(HttpStatus.OK).body(baseResponse);
     }
 
+    public static ResponseEntity<BaseResponse> createSuccessBaseResponse(){
 
-    public static BaseResponse createSuccessBaseResponse() {
-        return BaseResponse.builder()
+        BaseResponse baseResponse = BaseResponse.builder()
                 .es(0)
                 .message("success")
-                .status(200)
+                .status(HttpStatus.OK.value())
                 .time(System.currentTimeMillis())
                 .build();
+        return ResponseEntity.status(HttpStatus.OK).body(baseResponse);
     }
 
     public static BaseResponse createSuccessBaseResponseWithResults(Object results) {
@@ -45,15 +46,6 @@ public class BaseResponseUtil {
                 .message("success")
                 .status(200)
                 .results(results)
-                .time(System.currentTimeMillis())
-                .build();
-    }
-
-    public static BaseResponse createErrorBaseResponse() {
-        return BaseResponse.builder()
-                .es(1)
-                .message("failed!")
-                .status(400)
                 .time(System.currentTimeMillis())
                 .build();
     }
