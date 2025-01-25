@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface ProductDao extends MongoRepository<Product, Integer> {
+public interface ProductDao extends MongoRepository<Product, String> {
 }

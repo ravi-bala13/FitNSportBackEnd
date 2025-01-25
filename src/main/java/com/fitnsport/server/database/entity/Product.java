@@ -1,7 +1,11 @@
 package com.fitnsport.server.database.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Builder;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -10,12 +14,16 @@ import java.util.Date;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Document(collection = "product_details")
 public class Product {
 
     @Id
     @Field("product_id")
-    private Integer productId;
+    private String productId;
 
     @Field("product_name")
     private String productName;
@@ -42,6 +50,8 @@ public class Product {
     private Integer categoryId;
 
     private Double price;
+
+    private Double rating;
 
     private Integer quantity;
 
