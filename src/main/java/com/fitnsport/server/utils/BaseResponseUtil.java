@@ -40,6 +40,17 @@ public class BaseResponseUtil {
         return ResponseEntity.status(HttpStatus.OK).body(baseResponse);
     }
 
+    public static ResponseEntity<BaseResponse> createNoDataBaseResponse(){
+
+        BaseResponse baseResponse = BaseResponse.builder()
+                .es(1)
+                .message("No data found!")
+                .status(404)
+                .time(System.currentTimeMillis())
+                .build();
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(baseResponse);
+    }
+
     public static BaseResponse createSuccessBaseResponseWithResults(Object results) {
         return BaseResponse.builder()
                 .es(0)
@@ -59,7 +70,7 @@ public class BaseResponseUtil {
                 .build();
     }
 
-    public static BaseResponse createNoDataBaseResponse() {
+    public static BaseResponse createNoDataBaseResponse1() {
         return BaseResponse.builder()
                 .es(1)
                 .message("No data found!")

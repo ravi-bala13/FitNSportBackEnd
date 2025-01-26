@@ -23,12 +23,35 @@ public class ProductController {
 
     @ApiOperation("This API is used to add product in the user's cart")
     @PostMapping("/addToCart")
-    public ResponseEntity<BaseResponse> addToCart(Product product) {
+    public ResponseEntity<BaseResponse> addToCart(@RequestBody Product product) {
         try {
             productBL.addToCart(product);
             return BaseResponseUtil.createSuccessBaseResponse();
         } catch (Exception e) {
             log.error("Error in addToCart", e);
+            return new ResponseEntity<>(BaseResponseUtil.createErrorBaseResponse(e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @ApiOperation("This API is used to remove product from the user's cart")
+    @PostMapping("/removeFromCart/{productId}")
+    public ResponseEntity<BaseResponse> removeFromCart(@PathVariable String productId) {
+        try {
+            productBL.removeFromCart(productId);
+            return BaseResponseUtil.createSuccessBaseResponse();
+        } catch (Exception e) {
+            log.error("Error in removeFromCart", e);
+            return new ResponseEntity<>(BaseResponseUtil.createErrorBaseResponse(e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @ApiOperation("This API is used to get user's cart details")
+    @GetMapping("/getCartItems")
+    public ResponseEntity<BaseResponse> getCartItems() {
+        try {
+            return productBL.getCartItems();
+        } catch (Exception e) {
+            log.error("Error in getAllProducts", e);
             return new ResponseEntity<>(BaseResponseUtil.createErrorBaseResponse(e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -45,11 +68,22 @@ public class ProductController {
         }
     }
 
-    @ApiOperation("This API is used to create or save product details")
+    @ApiOperation("This API is used to get all product details")
     @GetMapping("/getAllProducts")
     public ResponseEntity<BaseResponse> getAllProducts() {
         try {
             return productBL.getAllProducts();
+        } catch (Exception e) {
+            log.error("Error in getAllProducts", e);
+            return new ResponseEntity<>(BaseResponseUtil.createErrorBaseResponse(e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @ApiOperation("This API is used to get a product details for given productId")
+    @GetMapping("/getProductDetails/{productId}")
+    public ResponseEntity<BaseResponse> getProductDetails(@PathVariable String productId) {
+        try {
+            return productBL.getProductDetails(productId);
         } catch (Exception e) {
             log.error("Error in getAllProducts", e);
             return new ResponseEntity<>(BaseResponseUtil.createErrorBaseResponse(e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);

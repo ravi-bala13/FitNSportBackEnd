@@ -91,6 +91,7 @@ public class CustomerBL {
             if (isAuthenticated) {
 
                 AccessToken accessToken = AccessToken.builder()
+                                            .userId(customer.getCustomerId())
                                             .userName(customer.getCustomerName())
                                             .userEmail(customer.getCustomerName())
                                             .createdAt(new Date()).build();
@@ -105,7 +106,7 @@ public class CustomerBL {
                 return BaseResponseUtil.createErrorBaseResponse("Invalid email or password");
             }
         }
-        return BaseResponseUtil.createNoDataBaseResponse();
+        return BaseResponseUtil.createNoDataBaseResponse1();
     }
 
     public ResponseEntity<BaseResponse> checkWhetherUserLoggedIn(HttpServletRequest request){

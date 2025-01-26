@@ -2,6 +2,7 @@ package com.fitnsport.server.database.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fitnsport.server.dto.Specifications;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Builder;
@@ -11,6 +12,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
+import java.util.List;
 
 @Data
 @Builder
@@ -22,26 +24,29 @@ import java.util.Date;
 public class Product {
 
     @Id
-    @Field("product_id")
-    private String productId;
+    private String id;
 
     @Field("product_name")
     private String productName;
 
-    @Field("product_description")
-    private String productDescription;
+    @Field("precise_description")
+    private String preciseDescription;
+
+    @Field("enhanced_description")
+    private String enhancedDescription;
+
+    private List<Specifications> specifications;
 
     @Field("image_url")
     private String imageUrl;
 
-    @Field("height")
     private String height;
 
-    @Field("width")
     private String width;
 
-    @Field("weight")
     private String weight;
+
+    private String size;
 
     @Field("supplier_id")
     private Integer supplierId;
@@ -49,16 +54,15 @@ public class Product {
     @Field("category_id")
     private Integer categoryId;
 
-    private Double price;
+    private Double price = 0.0;
 
-    private Double rating;
+    private Double rating = 0.0;
 
-    private Integer quantity;
+    private Integer quantity = 1;
 
     @Field("created_at")
     private Date createdAt;
 
     @Field("updated_at")
     private Date updatedAt;
-
 }
