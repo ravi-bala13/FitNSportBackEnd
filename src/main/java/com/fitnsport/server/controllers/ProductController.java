@@ -89,4 +89,27 @@ public class ProductController {
             return new ResponseEntity<>(BaseResponseUtil.createErrorBaseResponse(e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @ApiOperation("This API is used to add product in the user's wishList")
+    @PostMapping("/addToWishList")
+    public ResponseEntity<BaseResponse> addToWishList(@RequestBody Product product) {
+        try {
+            productBL.addToWishList(product);
+            return BaseResponseUtil.createSuccessBaseResponse();
+        } catch (Exception e) {
+            log.error("Error in addToCart", e);
+            return new ResponseEntity<>(BaseResponseUtil.createErrorBaseResponse(e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @ApiOperation("This API is used to get user's wishlist items")
+    @GetMapping("/getWishListItems")
+    public ResponseEntity<BaseResponse> getWishListItems() {
+        try {
+            return productBL.getWishListItems();
+        } catch (Exception e) {
+            log.error("Error in getAllProducts", e);
+            return new ResponseEntity<>(BaseResponseUtil.createErrorBaseResponse(e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }

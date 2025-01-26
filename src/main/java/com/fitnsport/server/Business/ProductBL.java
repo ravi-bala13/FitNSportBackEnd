@@ -3,8 +3,10 @@ package com.fitnsport.server.Business;
 import com.fitnsport.server.Components.AccessTokenParserHelper;
 import com.fitnsport.server.database.dao.CartDao;
 import com.fitnsport.server.database.dao.ProductDao;
+import com.fitnsport.server.database.dao.WishListDao;
 import com.fitnsport.server.database.entity.Cart;
 import com.fitnsport.server.database.entity.Product;
+import com.fitnsport.server.database.entity.WishList;
 import com.fitnsport.server.response.BaseResponse;
 import com.fitnsport.server.response.CustomerBaseResponse;
 import com.fitnsport.server.utils.BaseResponseUtil;
@@ -22,6 +24,9 @@ public class ProductBL {
 
     @Autowired
     private CartDao cartDao;
+
+    @Autowired
+    private WishListDao wishListDao;
 
     @Autowired
     private ProductDao productDao;
@@ -65,6 +70,37 @@ public class ProductBL {
         cartDao.save(cartDetails);
     }
 
+    public void addToWishList(Product product){
+        Optional<WishList> optionalUserWishList = wishListDao.findByCustomerId(accessTokenParserHelper.accessTokenObj.getUserId());
+
+        WishList wishList;
+        if (optionalUserWishList.isPresent()) {
+            wishList = optionalUserWishList.get();
+
+            // Check if product already exists in the cart
+            Optional<Product> existingProduct = wishList.getItems().stream()
+                    .filter(item -> item.getId().equals(product.getId()))
+                    .findFirst();
+
+            if (existingProduct.isPresent()) {
+                //ignore do nothing
+                return;
+            } else {
+                wishList.getItems().add(product);
+                wishList.setUpdatedAt(new Date());
+            }
+
+        } else {
+            wishList = WishList.builder()
+                    .customerId(accessTokenParserHelper.accessTokenObj.getUserId())
+                    .items(Collections.singletonList(product))
+                    .createdAt(new Date())
+                    .updatedAt(new Date())
+                    .build();
+        }
+        wishListDao.save(wishList);
+    }
+
     public void removeFromCart(String productId) {
         Optional<Cart> optionalUserCart = cartDao.findByCustomerId(accessTokenParserHelper.accessTokenObj.getUserId());
 
@@ -96,6 +132,11 @@ public class ProductBL {
     public ResponseEntity<BaseResponse> getCartItems(){
         Optional<Cart> optionalUserCart = cartDao.findByCustomerId(accessTokenParserHelper.accessTokenObj.getUserId());
         return BaseResponseUtil.createSuccessBaseResponse(optionalUserCart.orElseGet(Cart::new));
+    }
+
+    public ResponseEntity<BaseResponse> getWishListItems(){
+        Optional<WishList> optionalUserCart = wishListDao.findByCustomerId(accessTokenParserHelper.accessTokenObj.getUserId());
+        return BaseResponseUtil.createSuccessBaseResponse(optionalUserCart.orElseGet(WishList::new));
     }
 
     public void saveProducts(List<Product> productList){
