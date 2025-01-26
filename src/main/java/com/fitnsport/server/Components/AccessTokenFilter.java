@@ -20,8 +20,9 @@ public class AccessTokenFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        // 🔹 Skip filter execution for OPTIONS requests
-        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+        String path = request.getRequestURI();
+        // 🔹 Skip filter execution for OPTIONS requests and specific paths
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod()) || path.startsWith("/api/products/getAllProducts")) {
             filterChain.doFilter(request, response);
             return;
         }

@@ -19,5 +19,3 @@ spring:
     mongodb:
       uri: ${MONGODB_URI}
 
-  mvc:
-    dispatch-options-request: true # ✅ Allows handling of OPTIONS requests
