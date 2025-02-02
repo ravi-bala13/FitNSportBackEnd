@@ -22,7 +22,11 @@ public class AccessTokenFilter extends OncePerRequestFilter {
 
         String path = request.getRequestURI();
         // 🔹 Skip filter execution for OPTIONS requests and specific paths
-        if ("OPTIONS".equalsIgnoreCase(request.getMethod()) || path.startsWith("/api/products/getAllProducts")) {
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())
+                || path.startsWith("/api/products/getAllProducts")
+                || path.startsWith("/api/products/getTopSellingProducts")
+                || path.startsWith("/api/products/getProductDetails")
+                || path.startsWith("/api/products/getRelatedProducts")) {
             filterChain.doFilter(request, response);
             return;
         }
