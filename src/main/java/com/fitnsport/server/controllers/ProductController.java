@@ -51,7 +51,7 @@ public class ProductController {
         try {
             return productBL.getCartItems();
         } catch (Exception e) {
-            log.error("Error in getAllProducts", e);
+            log.error("Error in getCartItems", e);
             return new ResponseEntity<>(BaseResponseUtil.createErrorBaseResponse(e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -85,7 +85,7 @@ public class ProductController {
         try {
             return productBL.getProductDetails(productId);
         } catch (Exception e) {
-            log.error("Error in getAllProducts", e);
+            log.error("Error in getProductDetails", e);
             return new ResponseEntity<>(BaseResponseUtil.createErrorBaseResponse(e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -97,7 +97,7 @@ public class ProductController {
             productBL.addToWishList(product);
             return BaseResponseUtil.createSuccessBaseResponse();
         } catch (Exception e) {
-            log.error("Error in addToCart", e);
+            log.error("Error in addToWishList", e);
             return new ResponseEntity<>(BaseResponseUtil.createErrorBaseResponse(e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -108,7 +108,29 @@ public class ProductController {
         try {
             return productBL.getWishListItems();
         } catch (Exception e) {
-            log.error("Error in getAllProducts", e);
+            log.error("Error in getWishListItems", e);
+            return new ResponseEntity<>(BaseResponseUtil.createErrorBaseResponse(e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @ApiOperation("This API is used to get TopSellingProducts")
+    @GetMapping("/getTopSellingProducts")
+    public ResponseEntity<BaseResponse> getTopSellingProducts() {
+        try {
+            return productBL.getTopSellingProducts();
+        } catch (Exception e) {
+            log.error("Error in getTopSellingProducts", e);
+            return new ResponseEntity<>(BaseResponseUtil.createErrorBaseResponse(e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @ApiOperation("This API is used to get RelatedProducts for given product")
+    @GetMapping("/getRelatedProducts")
+    public ResponseEntity<BaseResponse> getRelatedProducts() {
+        try {
+            return productBL.getTopSellingProducts();
+        } catch (Exception e) {
+            log.error("Error in getRelatedProducts", e);
             return new ResponseEntity<>(BaseResponseUtil.createErrorBaseResponse(e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

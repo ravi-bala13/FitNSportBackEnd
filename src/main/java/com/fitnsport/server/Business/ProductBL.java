@@ -139,9 +139,27 @@ public class ProductBL {
         return BaseResponseUtil.createSuccessBaseResponse(optionalUserCart.orElseGet(WishList::new));
     }
 
+    public ResponseEntity<BaseResponse> getTopSellingProducts(){
+        List<Product> topRatedProducts = productDao.findTopRatedProducts();
+        return BaseResponseUtil.createSuccessBaseResponse(topRatedProducts);
+    }
+
     public void saveProducts(List<Product> productList){
+        for (int i = 0; i < productList.size(); i++) {
+            productList.get(i).setProductId(generateProductId(productList.get(i), i + 1));
+        }
+
         productDao.saveAll(productList);
     }
+
+    private String generateProductId(Product product, int inc) {
+        // Get the count directly from the database (faster & avoids large fetches)
+        long count = productDao.countByProductTypeEnum(product.getProductTypeEnum()) + inc;
+
+        // Generate ID in the format "bat_0000001"
+        return String.format("%s_%07d", product.getProductTypeEnum().toString().toLowerCase(), count);
+    }
+
 
     public ResponseEntity<BaseResponse> getAllProducts(){
         List<Product> productList = productDao.findAll();

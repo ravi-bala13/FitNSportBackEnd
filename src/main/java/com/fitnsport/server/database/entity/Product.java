@@ -2,6 +2,7 @@ package com.fitnsport.server.database.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fitnsport.server.Enums.ProductTypeEnum;
 import com.fitnsport.server.dto.Specifications;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -26,6 +27,9 @@ public class Product {
     @Id
     private String id;
 
+    @Field("product_id")
+    private String productId;
+
     @Field("product_name")
     private String productName;
 
@@ -36,6 +40,9 @@ public class Product {
     private String enhancedDescription;
 
     private List<Specifications> specifications;
+
+    @Field("product_type")
+    private ProductTypeEnum productTypeEnum;
 
     @Field("image_url")
     private String imageUrl;
