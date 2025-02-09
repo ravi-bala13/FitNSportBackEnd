@@ -34,9 +34,9 @@ public class ProductBL {
     @Autowired
     private AccessTokenParserHelper accessTokenParserHelper;
 
-    public void addToCart(Product product, boolean isUpdateCart, boolean isGuestUser, Integer guestUserId){
+    public void addToCart(Product product, boolean isUpdateCart, Integer guestUserId){
         Integer userId;
-        if(isGuestUser && guestUserId != null){
+        if(guestUserId > 0){
             userId = guestUserId;
         }else {
             userId = accessTokenParserHelper.accessTokenObj.getUserId();
@@ -82,8 +82,8 @@ public class ProductBL {
         cartDao.save(cartDetails);
     }
 
-    public void addToWishList(Product product){
-        Optional<WishList> optionalUserWishList = wishListDao.findByCustomerId(accessTokenParserHelper.accessTokenObj.getUserId());
+    public void addToWishList(Product product, Integer guestUserId){
+        Optional<WishList> optionalUserWishList = wishListDao.findByCustomerId(guestUserId > 0 ? guestUserId :accessTokenParserHelper.accessTokenObj.getUserId());
 
         WishList wishList;
         if (optionalUserWishList.isPresent()) {
@@ -113,8 +113,8 @@ public class ProductBL {
         wishListDao.save(wishList);
     }
 
-    public void removeFromCart(String productId) {
-        Optional<Cart> optionalUserCart = cartDao.findByCustomerId(accessTokenParserHelper.accessTokenObj.getUserId());
+    public void removeFromCart(String productId, Integer guestUserId){
+        Optional<Cart> optionalUserCart = cartDao.findByCustomerId(guestUserId > 0 ? guestUserId :accessTokenParserHelper.accessTokenObj.getUserId());
 
         if (optionalUserCart.isPresent()) {
             Cart cartDetails = optionalUserCart.get();
@@ -134,13 +134,13 @@ public class ProductBL {
         }
     }
 
-    public ResponseEntity<BaseResponse> getCartItems(){
-        Optional<Cart> optionalUserCart = cartDao.findByCustomerId(accessTokenParserHelper.accessTokenObj.getUserId());
+    public ResponseEntity<BaseResponse> getCartItems(Integer guestUserId){
+        Optional<Cart> optionalUserCart = cartDao.findByCustomerId(guestUserId > 0 ? guestUserId :accessTokenParserHelper.accessTokenObj.getUserId());
         return BaseResponseUtil.createSuccessBaseResponse(optionalUserCart.orElseGet(Cart::new));
     }
 
-    public ResponseEntity<BaseResponse> getWishListItems(){
-        Optional<WishList> optionalUserCart = wishListDao.findByCustomerId(accessTokenParserHelper.accessTokenObj.getUserId());
+    public ResponseEntity<BaseResponse> getWishListItems(Integer guestUserId){
+        Optional<WishList> optionalUserCart = wishListDao.findByCustomerId(guestUserId > 0 ? guestUserId :accessTokenParserHelper.accessTokenObj.getUserId());
         return BaseResponseUtil.createSuccessBaseResponse(optionalUserCart.orElseGet(WishList::new));
     }
 
