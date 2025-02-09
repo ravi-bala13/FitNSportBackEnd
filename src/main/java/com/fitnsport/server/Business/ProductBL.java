@@ -121,15 +121,8 @@ public class ProductBL {
             if (existingProduct.isPresent()) {
                 Product product = existingProduct.get();
 
-                if (product.getQuantity() > 1) {
-                    // 🔹 Decrease quantity and price if more than 1
-                    product.setQuantity(product.getQuantity() - 1);
-                    product.setPrice(product.getPrice()/2);
-                    cartDetails.setTotalPrice(cartDetails.getTotalPrice() - product.getPrice());
-                } else {
-                    // 🔹 Remove product from cart if quantity is 1
-                    cartDetails.getItems().remove(product);
-                }
+                cartDetails.setTotalPrice(cartDetails.getTotalPrice() - product.getPrice());
+                cartDetails.getItems().remove(product);
                 cartDao.save(cartDetails);
             }
         }
