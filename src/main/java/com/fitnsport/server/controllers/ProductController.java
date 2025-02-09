@@ -22,10 +22,10 @@ public class ProductController {
     ProductBL productBL;
 
     @ApiOperation("This API is used to add product in the user's cart")
-    @PostMapping("/addToCart")
+    @PostMapping("/cart/addToCart")
     public ResponseEntity<BaseResponse> addToCart(@RequestBody Product product,
-                                                  @RequestParam(defaultValue = "false") boolean isUpdateCart,
-                                                  @RequestParam(defaultValue = "0") Integer guestUserId) {
+                                                  @RequestParam(required = false, defaultValue = "false") boolean isUpdateCart,
+                                                  @RequestParam(required = false, defaultValue = "0") Integer guestUserId) {
         try {
             productBL.addToCart(product, isUpdateCart, guestUserId);
             return BaseResponseUtil.createSuccessBaseResponse();
@@ -36,9 +36,9 @@ public class ProductController {
     }
 
     @ApiOperation("This API is used to remove product from the user's cart")
-    @PostMapping("/removeFromCart/{productId}")
+    @PostMapping("/cart/removeFromCart/{productId}")
     public ResponseEntity<BaseResponse> removeFromCart(@PathVariable String productId,
-                                                       @RequestParam(defaultValue = "0") Integer guestUserId) {
+                                                       @RequestParam(required = false, defaultValue = "0") Integer guestUserId) {
         try {
             productBL.removeFromCart(productId, guestUserId);
             return BaseResponseUtil.createSuccessBaseResponse();
@@ -49,12 +49,38 @@ public class ProductController {
     }
 
     @ApiOperation("This API is used to get user's cart details")
-    @GetMapping("/getCartItems")
-    public ResponseEntity<BaseResponse> getCartItems(@RequestParam(defaultValue = "0") Integer guestUserId) {
+    @GetMapping("/cart/getCartItems")
+    public ResponseEntity<BaseResponse> getCartItems(@RequestParam(required = false, defaultValue = "0") Integer guestUserId) {
         try {
             return productBL.getCartItems(guestUserId);
         } catch (Exception e) {
             log.error("Error in getCartItems", e);
+            return new ResponseEntity<>(BaseResponseUtil.createErrorBaseResponse(e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+
+    @ApiOperation("This API is used to add product in the user's wishList")
+    @PostMapping("/cart/addToWishList")
+    public ResponseEntity<BaseResponse> addToWishList(@RequestBody Product product,
+                                                      @RequestParam(required = false, defaultValue = "0") Integer guestUserId) {
+        try {
+            productBL.addToWishList(product, guestUserId);
+            return BaseResponseUtil.createSuccessBaseResponse();
+        } catch (Exception e) {
+            log.error("Error in addToWishList", e);
+            return new ResponseEntity<>(BaseResponseUtil.createErrorBaseResponse(e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @ApiOperation("This API is used to get user's wishlist items")
+    @GetMapping("/cart/getWishListItems")
+    public ResponseEntity<BaseResponse> getWishListItems(@RequestParam(required = false, defaultValue = "0") Integer guestUserId) {
+        try {
+            return productBL.getWishListItems(guestUserId);
+        } catch (Exception e) {
+            log.error("Error in getWishListItems", e);
             return new ResponseEntity<>(BaseResponseUtil.createErrorBaseResponse(e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -89,30 +115,6 @@ public class ProductController {
             return productBL.getProductDetails(productId);
         } catch (Exception e) {
             log.error("Error in getProductDetails", e);
-            return new ResponseEntity<>(BaseResponseUtil.createErrorBaseResponse(e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    @ApiOperation("This API is used to add product in the user's wishList")
-    @PostMapping("/addToWishList")
-    public ResponseEntity<BaseResponse> addToWishList(@RequestBody Product product,
-                                                      @RequestParam(defaultValue = "0") Integer guestUserId) {
-        try {
-            productBL.addToWishList(product, guestUserId);
-            return BaseResponseUtil.createSuccessBaseResponse();
-        } catch (Exception e) {
-            log.error("Error in addToWishList", e);
-            return new ResponseEntity<>(BaseResponseUtil.createErrorBaseResponse(e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    @ApiOperation("This API is used to get user's wishlist items")
-    @GetMapping("/getWishListItems")
-    public ResponseEntity<BaseResponse> getWishListItems(@RequestParam(defaultValue = "0") Integer guestUserId) {
-        try {
-            return productBL.getWishListItems(guestUserId);
-        } catch (Exception e) {
-            log.error("Error in getWishListItems", e);
             return new ResponseEntity<>(BaseResponseUtil.createErrorBaseResponse(e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

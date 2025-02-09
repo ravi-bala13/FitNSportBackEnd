@@ -16,8 +16,7 @@ public class FilterConfig {
         FilterRegistrationBean<AccessTokenFilter> registrationBean = new FilterRegistrationBean<>();
 
         registrationBean.setFilter(accessTokenFilter);
-        registrationBean.addUrlPatterns("/api/*", "/api/products/addToCart/*"); // Apply only to this path
-//        registrationBean.addUrlPatterns("/api/products/addToCart");
+        registrationBean.addUrlPatterns("/api/*"); // Apply only to this path
         registrationBean.setOrder(1); // Priority of the filter
 
         return registrationBean;
