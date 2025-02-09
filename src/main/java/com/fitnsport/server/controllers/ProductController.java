@@ -23,9 +23,12 @@ public class ProductController {
 
     @ApiOperation("This API is used to add product in the user's cart")
     @PostMapping("/addToCart")
-    public ResponseEntity<BaseResponse> addToCart(@RequestBody Product product, @RequestParam(defaultValue = "false") boolean isUpdateCart) {
+    public ResponseEntity<BaseResponse> addToCart(@RequestBody Product product,
+                                                  @RequestParam(defaultValue = "false") boolean isUpdateCart,
+                                                  @RequestParam(defaultValue = "false") boolean isGuestUser,
+                                                  @RequestParam Integer guestUserId) {
         try {
-            productBL.addToCart(product, isUpdateCart);
+            productBL.addToCart(product, isUpdateCart, isGuestUser, guestUserId);
             return BaseResponseUtil.createSuccessBaseResponse();
         } catch (Exception e) {
             log.error("Error in addToCart", e);

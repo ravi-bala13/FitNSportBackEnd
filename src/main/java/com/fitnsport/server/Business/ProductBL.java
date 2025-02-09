@@ -34,8 +34,14 @@ public class ProductBL {
     @Autowired
     private AccessTokenParserHelper accessTokenParserHelper;
 
-    public void addToCart(Product product, boolean isUpdateCart){
-        Optional<Cart> optionalUserCart = cartDao.findByCustomerId(accessTokenParserHelper.accessTokenObj.getUserId());
+    public void addToCart(Product product, boolean isUpdateCart, boolean isGuestUser, Integer guestUserId){
+        Integer userId;
+        if(isGuestUser && guestUserId != null){
+            userId = guestUserId;
+        }else {
+            userId = accessTokenParserHelper.accessTokenObj.getUserId();
+        }
+        Optional<Cart> optionalUserCart = cartDao.findByCustomerId(userId);
 
         Cart cartDetails;
         if (optionalUserCart.isPresent()) {
@@ -66,7 +72,7 @@ public class ProductBL {
             cartDetails.setUpdatedAt(new Date());
         } else {
             cartDetails = Cart.builder()
-                    .customerId(accessTokenParserHelper.accessTokenObj.getUserId())
+                    .customerId(userId)
                     .items(Collections.singletonList(product))
                     .totalPrice(product.getPrice())
                     .createdAt(new Date())
