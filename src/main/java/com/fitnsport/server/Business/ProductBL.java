@@ -34,7 +34,7 @@ public class ProductBL {
     @Autowired
     private AccessTokenParserHelper accessTokenParserHelper;
 
-    public void addToCart(Product product){
+    public void addToCart(Product product, boolean isUpdateCart){
         Optional<Cart> optionalUserCart = cartDao.findByCustomerId(accessTokenParserHelper.accessTokenObj.getUserId());
 
         Cart cartDetails;
@@ -47,17 +47,23 @@ public class ProductBL {
                     .findFirst();
 
             if (existingProduct.isPresent()) {
-                // Update quantity or other fields if needed
-                existingProduct.get().setQuantity(existingProduct.get().getQuantity() + product.getQuantity());
-                existingProduct.get().setPrice(existingProduct.get().getPrice() + product.getPrice());
-                cartDetails.setTotalPrice(cartDetails.getTotalPrice() + product.getPrice());
-                cartDetails.setUpdatedAt(new Date());
+                if(isUpdateCart){
+                    double singleProductPrice = existingProduct.get().getPrice() / existingProduct.get().getQuantity();
+                    double toMinusFromTotalPrice = cartDetails.getTotalPrice() - existingProduct.get().getPrice();
+                    existingProduct.get().setQuantity(product.getQuantity());
+                    existingProduct.get().setPrice(singleProductPrice * product.getQuantity());
+                    cartDetails.setTotalPrice(cartDetails.getTotalPrice() - toMinusFromTotalPrice);
+                    cartDetails.setTotalPrice(cartDetails.getTotalPrice() + existingProduct.get().getPrice());
+                }else{
+                    existingProduct.get().setQuantity(existingProduct.get().getQuantity() + product.getQuantity());
+                    existingProduct.get().setPrice(existingProduct.get().getPrice() + product.getPrice());
+                    cartDetails.setTotalPrice(cartDetails.getTotalPrice() + product.getPrice());
+                }
             } else {
                 cartDetails.getItems().add(product);
                 cartDetails.setTotalPrice(cartDetails.getTotalPrice() + product.getPrice());
-                cartDetails.setUpdatedAt(new Date());
             }
-
+            cartDetails.setUpdatedAt(new Date());
         } else {
             cartDetails = Cart.builder()
                     .customerId(accessTokenParserHelper.accessTokenObj.getUserId())
